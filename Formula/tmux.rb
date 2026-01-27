@@ -72,6 +72,12 @@ class Tmux < Formula
     system "./configure", *args, *std_configure_args
     system "make", "install"
 
+    # Re-sign with the bundle identifier from the embedded Info.plist so
+    # macOS associates Local Network Privacy consent with this binary.
+    if OS.mac?
+      system "codesign", "-s", "-", "-f", "--identifier", "com.github.tmux", bin/"tmux"
+    end
+
     pkgshare.install "example_tmux.conf"
     bash_completion.install resource("completion")
   end
