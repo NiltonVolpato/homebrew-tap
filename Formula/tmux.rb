@@ -51,6 +51,13 @@ class Tmux < Formula
             <string>#{version}</string>
             <key>NSLocalNetworkUsageDescription</key>
             <string>tmux needs access to the local network to manage terminal sessions.</string>
+            <key>NSBonjourServices</key>
+            <array>
+                <string>_http._tcp</string>
+                <string>_ssh._tcp</string>
+                <string>_sftp-ssh._tcp</string>
+                <string>_smb._tcp</string>
+            </array>
         </dict>
         </plist>
       PLIST
