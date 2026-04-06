@@ -118,7 +118,7 @@ lines = File.readlines(base_path)
 output = []
 skip_indent = nil
 
-output << "# frozen_string_literal: true" << "\n"
+output << "# frozen_string_literal: true" << "\n\n"
 
 lines.each do |line|
   # When `skip_indent` is set, skips all lines indented more than that amount.
