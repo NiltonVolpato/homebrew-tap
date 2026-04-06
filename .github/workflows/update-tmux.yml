@@ -33,7 +33,7 @@ jobs:
             - name: Check for changes
               id: check
               run: |
-                  if git diff --quiet 2>/dev/null; then
+                  if git diff --exit-code; then
                     echo "changed=false" >> "$GITHUB_OUTPUT"
                     echo "No changes"
                   else
