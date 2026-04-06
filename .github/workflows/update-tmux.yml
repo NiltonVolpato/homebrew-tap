@@ -8,36 +8,47 @@ on:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout tap
-            uses: actions/checkout@v4
+        uses: actions/checkout@v4
+
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
       - name: Download core tmux formula
         run: |
           mkdir -p base
           curl -sL -o base/tmux.rb \
             https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/t/tmux.rb
-          
+
+      - name: Generate formula
+        run: |
+          ruby scripts/generate-formula.rb
+
+      - name: Fix style
+        run: |
+          brew style --fix Formula/tmux-macos-net.rb || true
+
       - name: Check for changes
         id: check
         run: |
-          if git diff --quiet base/tmux.rb 2>/dev/null; then
+          if git diff --quiet Formula/tmux-macos-net.rb 2>/dev/null; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No changes in core tmux formula"
+            echo "No changes in generated formula"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Core tmux formula has been updated"
+            echo "Formula has been updated"
           fi
-          
+
       - name: Commit and push if changed
         if: steps.check.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add base/tmux.rb
-          git commit -m "Update base tmux formula from homebrew-core
+          git add Formula/tmux-macos-net.rb base/tmux.rb
+          git commit -m "Update tmux-macos-net from homebrew-core
 
-          Automated update from:
-          https://github.com/Homebrew/homebrew-core/tree/master/Formula/t/tmux.rb"
+          Automated update of base tmux formula and regeneration.
+          Source: https://github.com/Homebrew/homebrew-core/tree/master/Formula/t/tmux.rb"
           git push

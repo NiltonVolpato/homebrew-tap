@@ -1,7 +1,5 @@
 class TmuxMacosNet < Formula
   desc "Terminal multiplexer with macOS Local Network Privacy support"
-
-  conflicts_with "tmux", because: "both install `tmux` binary"
   homepage "https://tmux.github.io/"
   url "https://github.com/tmux/tmux/releases/download/3.6a/tmux-3.6a.tar.gz"
   sha256 "b6d8d9c76585db8ef5fa00d4931902fa4b8cbe8166f528f44fc403961a3f3759"
@@ -13,7 +11,6 @@ class TmuxMacosNet < Formula
     regex(/v?(\d+(?:\.\d+)+[a-z]?)/i)
     strategy :github_latest
   end
-
 
   head do
     url "https://github.com/tmux/tmux.git", branch: "master"
@@ -28,7 +25,9 @@ class TmuxMacosNet < Formula
   depends_on "ncurses"
   depends_on "utf8proc"
 
-  uses_from_macos "bison" => :build # for yacc
+  uses_from_macos "bison" => :build
+
+  conflicts_with "tmux", because: "both install `tmux` binary" # for yacc
 
   def install
     system "sh", "autogen.sh" if build.head?
@@ -66,20 +65,16 @@ class TmuxMacosNet < Formula
       --sysconfdir=#{etc}
       --enable-utf8proc
     ]
-
     args << "--with-TERM=screen-256color" if OS.mac? && MacOS.version < :sonoma
 
     system "./configure", *args, *std_configure_args
     system "make", "install"
 
-    if OS.mac?
-      system "codesign", "-s", "-", "-f", "--identifier", "com.github.tmux.macosnet", bin/"tmux"
-    end
+    system "codesign", "-s", "-", "-f", "--identifier", "com.github.tmux.macosnet", bin/"tmux" if OS.mac?
 
     pkgshare.install "example_tmux.conf"
     bash_completion.install resource("completion")
   end
-
 
   def caveats
     <<~EOS
@@ -108,16 +103,15 @@ class TmuxMacosNet < Formula
     keep_alive true
     process_type :interactive
     environment_variables(
-      "PATH" => "/usr/bin:/bin:/usr/sbin:/sbin:#{HOMEBREW_PREFIX}/bin:#{HOMEBREW_PREFIX}/sbin",
-      "TERM" => "screen-256color",
-      "HOME" => ENV["HOME"],
-      "LANG" => "en_US.UTF-8",
-      "TMUX_TMPDIR" => "/tmp"
+      "PATH"        => "/usr/bin:/bin:/usr/sbin:/sbin:#{HOMEBREW_PREFIX}/bin:#{HOMEBREW_PREFIX}/sbin",
+      "TERM"        => "screen-256color",
+      "HOME"        => Dir.home,
+      "LANG"        => "en_US.UTF-8",
+      "TMUX_TMPDIR" => "/tmp",
     )
     log_path "/tmp/tmux-server.log"
     error_log_path "/tmp/tmux-server.err"
   end
-
 
   test do
     system bin/"tmux", "-V"

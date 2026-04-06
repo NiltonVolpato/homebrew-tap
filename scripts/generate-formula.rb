@@ -51,15 +51,12 @@ def generate_custom_install
       --sysconfdir=\#{etc}
       --enable-utf8proc
     ]
-
     args << "--with-TERM=screen-256color" if OS.mac? && MacOS.version < :sonoma
 
     system "./configure", *args, *std_configure_args
     system "make", "install"
 
-    if OS.mac?
-      system "codesign", "-s", "-", "-f", "--identifier", "com.github.tmux.macosnet", bin/"tmux"
-    end
+    system "codesign", "-s", "-", "-f", "--identifier", "com.github.tmux.macosnet", bin/"tmux" if OS.mac?
 
     pkgshare.install "example_tmux.conf"
     bash_completion.install resource("completion")
@@ -102,11 +99,11 @@ def generate_service_block
     keep_alive true
     process_type :interactive
     environment_variables(
-      "PATH" => "/usr/bin:/bin:/usr/sbin:/sbin:\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin",
-      "TERM" => "screen-256color",
-      "HOME" => ENV["HOME"],
-      "LANG" => "en_US.UTF-8",
-      "TMUX_TMPDIR" => "/tmp"
+      "PATH"    => "/usr/bin:/bin:/usr/sbin:/sbin:\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin",
+      "TERM"    => "screen-256color",
+      "HOME"    => Dir.home,
+      "LANG"    => "en_US.UTF-8",
+      "TMUX_TMPDIR" => "/tmp",
     )
     log_path "/tmp/tmux-server.log"
     error_log_path "/tmp/tmux-server.err"
@@ -141,10 +138,15 @@ lines.each do |line|
     next
   end
 
-  # Desc + conflicts
+  # Desc - we'll add conflicts_with after homepage
   if line =~ /^  desc "Terminal multiplexer"$/
     output << '  desc "Terminal multiplexer with macOS Local Network Privacy support"' << "\n"
-    output << "\n"
+    next
+  end
+  
+  # Add conflicts_with after license (before livecheck/head)
+  if line =~ /^  license /
+    output << line
     output << '  conflicts_with "tmux", because: "both install `tmux` binary"' << "\n"
     next
   end
