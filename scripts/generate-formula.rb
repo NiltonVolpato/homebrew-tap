@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # Generates tmux-macos-net.rb by patching base/tmux.rb
 
-base_path = File.join(__dir__, '..', 'base', 'tmux.rb')
-output_path = File.join(__dir__, '..', 'Formula', 'tmux-macos-net.rb')
+base_path = File.join(__dir__, "..", "base", "tmux.rb")
+output_path = File.join(__dir__, "..", "Formula", "tmux-macos-net.rb")
 
 unless File.exist?(base_path)
   puts "Error: base/tmux.rb not found"
@@ -115,56 +117,52 @@ end
 # Main processing
 lines = File.readlines(base_path)
 output = []
-in_install = false
 skip_indent = nil
 
 lines.each do |line|
   # When `skip_indent` is set, skips all lines indented more than that amount.
-  if skip_indent != nil
-    if line.strip.empty?
-      next
-    end
-    if indent_level(line) > skip_indent
-      next
-    else
-      skip_indent = nil
-      next
-    end
+  unless skip_indent.nil?
+    next if line.strip.empty?
+    next if indent_level(line) > skip_indent
+
+    skip_indent = nil
+
+    next
   end
 
   # Class name
-  if line =~ /^class Tmux < Formula$/
-    output << 'class TmuxMacosNet < Formula' << "\n"
+  if /^class Tmux < Formula$/.match?(line)
+    output << "class TmuxMacosNet < Formula" << "\n"
     next
   end
 
   # Desc - we'll add conflicts_with after homepage
-  if line =~ /^  desc "Terminal multiplexer"$/
+  if /^  desc "Terminal multiplexer"$/.match?(line)
     output << '  desc "Terminal multiplexer with macOS Local Network Privacy support"' << "\n"
     next
   end
-  
+
   # Add conflicts_with after license (before livecheck/head)
-  if line =~ /^  license /
+  if /^  license /.match?(line)
     output << line
     output << '  conflicts_with "tmux", because: "both install `tmux` binary"' << "\n"
     next
   end
 
   # Remove bottle do
-  if line =~ /^  bottle do$/
+  if /^  bottle do$/.match?(line)
     skip_indent = indent_level(line)
     next
   end
 
   # Skip old install and caveats
-  if line =~ /^  def install$/
+  if /^  def install$/.match?(line)
     output << generate_custom_install
     skip_indent = indent_level(line)
     next
   end
 
-  if line =~ /^  def caveats$/
+  if /^  def caveats$/.match?(line)
     # Replace caveats
     output << generate_custom_caveats
     # Also output service block here (it doesn't exist in the base)
