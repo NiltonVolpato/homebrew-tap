@@ -53,4 +53,4 @@ jobs:
 
                   Automated update of base tmux formula and regeneration.
                   Source: https://github.com/Homebrew/homebrew-core/tree/master/Formula/t/tmux.rb"
-                  git push
+                  git push origin HEAD:main
