@@ -37,7 +37,7 @@ jobs:
 
             - name: Fix style
               run: |
-                  brew style --fix Formula/*.rb || true
+                  brew style --fix Formula/*.rb base/*.rb || true
 
             - name: Check for changes
               id: check
