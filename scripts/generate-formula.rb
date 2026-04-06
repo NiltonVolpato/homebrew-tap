@@ -1,35 +1,20 @@
-class TmuxMacosNet < Formula
-  desc "Terminal multiplexer with macOS Local Network Privacy support"
+#!/usr/bin/env ruby
+# Generates tmux-macos-net.rb by patching base/tmux.rb
 
-  conflicts_with "tmux", because: "both install `tmux` binary"
-  homepage "https://tmux.github.io/"
-  url "https://github.com/tmux/tmux/releases/download/3.6a/tmux-3.6a.tar.gz"
-  sha256 "b6d8d9c76585db8ef5fa00d4931902fa4b8cbe8166f528f44fc403961a3f3759"
-  license "ISC"
-  compatibility_version 1
+base_path = File.join(__dir__, '..', 'base', 'tmux.rb')
+output_path = File.join(__dir__, '..', 'Formula', 'tmux-macos-net.rb')
 
-  livecheck do
-    url :stable
-    regex(/v?(\d+(?:\.\d+)+[a-z]?)/i)
-    strategy :github_latest
-  end
+unless File.exist?(base_path)
+  puts "Error: base/tmux.rb not found"
+  exit 1
+end
 
+def indent_level(line)
+  line[/^\s*/].length
+end
 
-  head do
-    url "https://github.com/tmux/tmux.git", branch: "master"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "pkgconf" => :build
-  depends_on "libevent"
-  depends_on "ncurses"
-  depends_on "utf8proc"
-
-  uses_from_macos "bison" => :build # for yacc
-
+def generate_custom_install
+  <<-RUBY
   def install
     system "sh", "autogen.sh" if build.head?
 
@@ -45,7 +30,7 @@ class TmuxMacosNet < Formula
             <key>CFBundleName</key>
             <string>tmux-macos-net</string>
             <key>CFBundleVersion</key>
-            <string>#{version}</string>
+            <string>\#{version}</string>
             <key>NSLocalNetworkUsageDescription</key>
             <string>tmux needs access to the local network to allow spawned applications to connect to local network resources.</string>
             <key>NSBonjourServices</key>
@@ -58,12 +43,12 @@ class TmuxMacosNet < Formula
         </dict>
         </plist>
       PLIST
-      ENV.append "LDFLAGS", "-Wl,-sectcreate,__TEXT,__info_plist,#{buildpath}/Info.plist"
+      ENV.append "LDFLAGS", "-Wl,-sectcreate,__TEXT,__info_plist,\#{buildpath}/Info.plist"
     end
 
     args = %W[
       --enable-sixel
-      --sysconfdir=#{etc}
+      --sysconfdir=\#{etc}
       --enable-utf8proc
     ]
 
@@ -80,7 +65,11 @@ class TmuxMacosNet < Formula
     bash_completion.install resource("completion")
   end
 
+  RUBY
+end
 
+def generate_custom_caveats
+  <<-RUBY
   def caveats
     <<~EOS
       tmux-macos-net is installed as `tmux` and includes an embedded Info.plist
@@ -103,12 +92,17 @@ class TmuxMacosNet < Formula
     EOS
   end
 
+  RUBY
+end
+
+def generate_service_block
+  <<-RUBY
   service do
     run [opt_bin/"tmux", "-D"]
     keep_alive true
     process_type :interactive
     environment_variables(
-      "PATH" => "/usr/bin:/bin:/usr/sbin:/sbin:#{HOMEBREW_PREFIX}/bin:#{HOMEBREW_PREFIX}/sbin",
+      "PATH" => "/usr/bin:/bin:/usr/sbin:/sbin:\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin",
       "TERM" => "screen-256color",
       "HOME" => ENV["HOME"],
       "LANG" => "en_US.UTF-8",
@@ -118,18 +112,68 @@ class TmuxMacosNet < Formula
     error_log_path "/tmp/tmux-server.err"
   end
 
-
-  test do
-    system bin/"tmux", "-V"
-
-    require "pty"
-
-    socket = testpath/tap.user
-    PTY.spawn bin/"tmux", "-S", socket, "-f", File::NULL
-    sleep 10
-
-    assert_path_exists socket
-    assert_predicate socket, :socket?
-    assert_equal "no server running on #{socket}", shell_output("#{bin}/tmux -S#{socket} list-sessions 2>&1", 1).chomp
-  end
+  RUBY
 end
+
+# Main processing
+lines = File.readlines(base_path)
+output = []
+in_install = false
+skip_indent = nil
+
+lines.each do |line|
+  # When `skip_indent` is set, skips all lines indented more than that amount.
+  if skip_indent != nil
+    if line.strip.empty?
+      next
+    end
+    if indent_level(line) > skip_indent
+      next
+    else
+      skip_indent = nil
+      next
+    end
+  end
+
+  # Class name
+  if line =~ /^class Tmux < Formula$/
+    output << 'class TmuxMacosNet < Formula' << "\n"
+    next
+  end
+
+  # Desc + conflicts
+  if line =~ /^  desc "Terminal multiplexer"$/
+    output << '  desc "Terminal multiplexer with macOS Local Network Privacy support"' << "\n"
+    output << "\n"
+    output << '  conflicts_with "tmux", because: "both install `tmux` binary"' << "\n"
+    next
+  end
+
+  # Remove bottle do
+  if line =~ /^  bottle do$/
+    skip_indent = indent_level(line)
+    next
+  end
+
+  # Skip old install and caveats
+  if line =~ /^  def install$/
+    output << generate_custom_install
+    skip_indent = indent_level(line)
+    next
+  end
+
+  if line =~ /^  def caveats$/
+    # Replace caveats
+    output << generate_custom_caveats
+    # Also output service block here (it doesn't exist in the base)
+    output << generate_service_block
+    # Skip until end of caveats
+    skip_indent = indent_level(line)
+    next
+  end
+
+  output << line
+end
+
+File.write(output_path, output.join)
+puts "Generated: #{output_path}"
