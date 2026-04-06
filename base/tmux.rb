@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class Tmux < Formula
   desc "Terminal multiplexer"
   homepage "https://tmux.github.io/"
