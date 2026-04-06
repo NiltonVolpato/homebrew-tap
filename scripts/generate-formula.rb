@@ -119,6 +119,8 @@ lines = File.readlines(base_path)
 output = []
 skip_indent = nil
 
+output << "# frozen_string_literal: true" << "\n"
+
 lines.each do |line|
   # When `skip_indent` is set, skips all lines indented more than that amount.
   unless skip_indent.nil?
@@ -129,6 +131,8 @@ lines.each do |line|
 
     next
   end
+
+  next if /^# frozen_string_literal: true$/.match?(line)
 
   # Class name
   if /^class Tmux < Formula$/.match?(line)
