@@ -61,7 +61,6 @@ def generate_custom_install
     system "codesign", "-s", "-", "-f", "--identifier", "com.github.tmux.macosnet", bin/"tmux" if OS.mac?
 
     pkgshare.install "example_tmux.conf"
-    bash_completion.install resource("completion")
   end
 
   RUBY

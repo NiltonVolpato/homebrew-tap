@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TmuxMacosNet < Formula
   desc "Terminal multiplexer with macOS Local Network Privacy support"
   homepage "https://tmux.github.io/"
@@ -73,7 +75,6 @@ class TmuxMacosNet < Formula
     system "codesign", "-s", "-", "-f", "--identifier", "com.github.tmux.macosnet", bin/"tmux" if OS.mac?
 
     pkgshare.install "example_tmux.conf"
-    bash_completion.install resource("completion")
   end
 
   def caveats
