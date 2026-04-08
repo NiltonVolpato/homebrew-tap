@@ -100,7 +100,7 @@ def generate_service_block
     keep_alive true
     process_type :interactive
     environment_variables(
-      "PATH"        => "/usr/bin:/bin:/usr/sbin:/sbin:\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin",
+      "PATH"        => "\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pmk/env/global/bin:/opt/X11/bin:/Library/Apple/usr/bin",
       "TERM"        => "xterm-256color",
       "HOME"        => Dir.home,
       "LANG"        => "en_US.UTF-8",
@@ -123,11 +123,9 @@ output << "# frozen_string_literal: true" << "\n\n"
 
 lines.each do |line|
   if skip_empty
-    if line.strip.empty?
-      next
-    else
-      skip_empty = false
-    end
+    next if line.strip.empty?
+
+    skip_empty = false
   end
 
   # When `skip_indent` is set, skips all lines indented more than that amount.
