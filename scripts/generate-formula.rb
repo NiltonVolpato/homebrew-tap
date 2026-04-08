@@ -100,11 +100,12 @@ def generate_service_block
     keep_alive true
     process_type :interactive
     environment_variables(
-      "PATH"        => "\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pmk/env/global/bin:/opt/X11/bin:/Library/Apple/usr/bin",
-      "TERM"        => "xterm-256color",
-      "HOME"        => Dir.home,
-      "LANG"        => "en_US.UTF-8",
-      "TMUX_TMPDIR" => "/tmp",
+      PATH:    "\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      USER:    ENV["USER"],
+      LOGNAME: ENV["USER"],
+      TERM:    "xterm-256color",
+      HOME:    Dir.home,
+      LANG:    "en_US.UTF-8",
     )
     log_path "/tmp/tmux-server.log"
     error_log_path "/tmp/tmux-server.err"
