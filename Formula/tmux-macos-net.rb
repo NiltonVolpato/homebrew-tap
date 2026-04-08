@@ -27,9 +27,9 @@ class TmuxMacosNet < Formula
   depends_on "ncurses"
   depends_on "utf8proc"
 
-  uses_from_macos "bison" => :build
+  uses_from_macos "bison" => :build # for yacc
 
-  conflicts_with "tmux", because: "both install `tmux` binary" # for yacc
+  conflicts_with "tmux", because: "both install `tmux` binary"
 
   def install
     system "sh", "autogen.sh" if build.head?
@@ -105,7 +105,7 @@ class TmuxMacosNet < Formula
     process_type :interactive
     environment_variables(
       "PATH"        => "/usr/bin:/bin:/usr/sbin:/sbin:#{HOMEBREW_PREFIX}/bin:#{HOMEBREW_PREFIX}/sbin",
-      "TERM"        => "screen-256color",
+      "TERM"        => "xterm-256color",
       "HOME"        => Dir.home,
       "LANG"        => "en_US.UTF-8",
       "TMUX_TMPDIR" => "/tmp",

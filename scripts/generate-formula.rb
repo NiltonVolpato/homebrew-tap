@@ -100,10 +100,10 @@ def generate_service_block
     keep_alive true
     process_type :interactive
     environment_variables(
-      "PATH"    => "/usr/bin:/bin:/usr/sbin:/sbin:\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin",
-      "TERM"    => "screen-256color",
-      "HOME"    => Dir.home,
-      "LANG"    => "en_US.UTF-8",
+      "PATH"        => "/usr/bin:/bin:/usr/sbin:/sbin:\#{HOMEBREW_PREFIX}/bin:\#{HOMEBREW_PREFIX}/sbin",
+      "TERM"        => "xterm-256color",
+      "HOME"        => Dir.home,
+      "LANG"        => "en_US.UTF-8",
       "TMUX_TMPDIR" => "/tmp",
     )
     log_path "/tmp/tmux-server.log"
@@ -117,17 +117,26 @@ end
 lines = File.readlines(base_path)
 output = []
 skip_indent = nil
+skip_empty = false
 
 output << "# frozen_string_literal: true" << "\n\n"
 
 lines.each do |line|
+  if skip_empty
+    if line.strip.empty?
+      next
+    else
+      skip_empty = false
+    end
+  end
+
   # When `skip_indent` is set, skips all lines indented more than that amount.
   unless skip_indent.nil?
     next if line.strip.empty?
     next if indent_level(line) > skip_indent
 
     skip_indent = nil
-
+    skip_empty = true
     next
   end
 
@@ -145,21 +154,16 @@ lines.each do |line|
     next
   end
 
-  # Add conflicts_with after license (before livecheck/head)
-  if /^  license /.match?(line)
-    output << line
-    output << '  conflicts_with "tmux", because: "both install `tmux` binary"' << "\n"
-    next
-  end
-
   # Remove bottle do
   if /^  bottle do$/.match?(line)
     skip_indent = indent_level(line)
     next
   end
 
-  # Skip old install and caveats
+  # Add conflicts_with and replace old install.
   if /^  def install$/.match?(line)
+    output << '  conflicts_with "tmux", because: "both install `tmux` binary"' << "\n"
+    output << "\n"
     output << generate_custom_install
     skip_indent = indent_level(line)
     next
