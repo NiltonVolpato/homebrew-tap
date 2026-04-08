@@ -1,3 +1,4 @@
+# typed: strict
 # frozen_string_literal: true
 
 class TmuxMacosNet < Formula
@@ -104,12 +105,13 @@ class TmuxMacosNet < Formula
     keep_alive true
     process_type :interactive
     environment_variables(
-      PATH:    "#{HOMEBREW_PREFIX}/bin:#{HOMEBREW_PREFIX}/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
-      USER:    ENV["USER"],
-      LOGNAME: ENV["USER"],
-      TERM:    "xterm-256color",
-      HOME:    Dir.home,
-      LANG:    "en_US.UTF-8",
+      PATH:      "#{HOMEBREW_PREFIX}/bin:#{HOMEBREW_PREFIX}/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      USER:      ENV["USER"],
+      LOGNAME:   ENV["USER"],
+      TERM:      "xterm-256color",
+      COLORTERM: "truecolor",
+      HOME:      Dir.home,
+      LANG:      "en_US.UTF-8",
     )
     log_path "/tmp/tmux-server.log"
     error_log_path "/tmp/tmux-server.err"
