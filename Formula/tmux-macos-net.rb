@@ -4,7 +4,7 @@ class TmuxMacosNet < Formula
   desc "Terminal multiplexer with macOS Local Network Privacy support"
   homepage "https://tmux.github.io/"
   url "https://github.com/tmux/tmux/releases/download/3.6b/tmux-3.6b.tar.gz"
-  sha256 "5ce92c0ab4ac6a465cf6f8e988ca0aefd3b5ba1e4f6fa5bc4c92aa8546641021"
+  sha256 "390759d25fdba016887ec982b808927e637070fd7d03a8021f8ef3102b9ae3c7"
   license "ISC"
   compatibility_version 1
 
