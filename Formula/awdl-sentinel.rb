@@ -1,13 +1,13 @@
 class AwdlSentinel < Formula
-  desc "Kernel-level sentinel to suppress AWDL-caused WiFi latency trashing."
+  desc "Kernel-level sentinel to suppress AWDL-caused WiFi latency trashing"
   homepage "https://github.com/NiltonVolpato/awdl-sentinel/"
   url "https://github.com/NiltonVolpato/awdl-sentinel/archive/refs/tags/v0.0.0.tar.gz"
   sha256 "a1fbf7de348831d3c677c1b555b142893beda9c2e6fd3ea82084343e1af78c21"
-  head "https://github.com/NiltonVolpato/awdl-sentinel.git"
   license "Apache-2.0"
+  head "https://github.com/NiltonVolpato/awdl-sentinel.git"
 
-  depends_on :macos
   depends_on xcode: ["14.0", :build]
+  depends_on :macos
 
   def install
     system "make"
@@ -25,6 +25,6 @@ class AwdlSentinel < Formula
   end
 
   test do
-    assert_predicate bin/"awdl-sentinel", :exist?
+    assert_path_exists bin/"awdl-sentinel"
   end
 end
