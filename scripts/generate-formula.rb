@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Generates tmux-macos-net.rb by patching base/tmux.rb
+# Generates tmux-macos-net.rb by patching base/tmux.rb.template
 
-base_path = File.join(__dir__, "..", "base", "tmux.rb")
+base_path = File.join(__dir__, "..", "base", "tmux.rb.template")
 output_path = File.join(__dir__, "..", "Formula", "tmux-macos-net.rb")
 
 unless File.exist?(base_path)
-  puts "Error: base/tmux.rb not found"
+  puts "Error: base/tmux.rb.template not found"
   exit 1
 end
 
