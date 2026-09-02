@@ -28,7 +28,7 @@ jobs:
             - name: Download core tmux formula
               run: |
                   mkdir -p base
-                  curl -sL -o base/tmux.rb \
+                  curl -sL -o base/tmux.rb.template \
                     https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/t/tmux.rb
 
             - name: Generate formula
@@ -37,7 +37,7 @@ jobs:
 
             - name: Fix style
               run: |
-                  brew style --fix Formula/*.rb base/*.rb || true
+                  brew style --fix Formula/*.rb || true
 
             - name: Check for changes
               id: check
