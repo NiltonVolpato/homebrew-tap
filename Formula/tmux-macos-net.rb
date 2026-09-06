@@ -35,7 +35,10 @@ class TmuxMacosNet < Formula
     depends_on "jemalloc"
   end
 
+  # runs a server as a test
   conflicts_with "tmux", because: "both install `tmux` binary"
+
+  allow_network_access! :test
 
   def install
     system "sh", "autogen.sh" if build.head?
