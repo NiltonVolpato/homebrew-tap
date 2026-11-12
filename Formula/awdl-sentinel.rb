@@ -24,6 +24,14 @@ class AwdlSentinel < Formula
     error_log_path var/"log/awdl-sentinel.log"
   end
 
+  def caveats
+    <<~EOS
+      To launch AWDL Sentinel seamlessly from Spotlight, generate a native macOS wrapper in your Applications folder by running:
+
+        osacompile -o "/Applications/AWDL Sentinel.app" -e 'tell application "Finder" to open POSIX file "#{opt_prefix}/AWDL Sentinel.app"'
+    EOS
+  end
+
   test do
     assert_path_exists bin/"awdl-sentinel"
   end
